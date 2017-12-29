@@ -148,8 +148,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
 
         final String TAG = GetMovies.class.getSimpleName();
         final String baseURL = "http://api.themoviedb.org/3";
-        final String popular = "/movie/popular";
-        final String rating = "/movie/top_rated";
+        final String popularURL = "/movie/popular";
+        final String ratingURL = "/movie/top_rated";
         final String parameterKey = "api_key";
         private Context mContext;
         private int mOrder;
@@ -225,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
         private URL buildURL() {
             String movieApiKey = mContext.getResources().getString(R.string.movie_key);
             Uri builtUri =
-                    Uri.parse(baseURL + (mOrder == 1 ? popular : rating))
+                    Uri.parse(baseURL + (mOrder == POPULAR ? popularURL : ratingURL))
                             .buildUpon()
                             .appendQueryParameter(parameterKey, movieApiKey)
                             .build();
