@@ -1,14 +1,21 @@
 package com.example.lcout.mymovies;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.net.Uri;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.lcout.mymovies.data.FavouriteContract;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
@@ -26,6 +33,32 @@ public class DetailsActivity extends AppCompatActivity {
 
         getMovieFromExtra();
         pupulateScreenInfo();
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addFavouriteMovie();
+            }
+        });
+    }
+
+    private void addFavouriteMovie() {
+        if (mMovie == null || mMovie.id < 1)
+            return;
+
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(FavouriteContract.FavouriteEntry.COLUMN_MOVIE_ID, mMovie.id);
+        contentValues.put(FavouriteContract.FavouriteEntry.COLUMN_TITLE, mMovie.title);
+
+        Uri uri = getContentResolver().insert(FavouriteContract.FavouriteEntry.CONTENT_URI, contentValues);
+
+        if(uri != null) {
+            Toast.makeText(getBaseContext(), uri.toString(), Toast.LENGTH_LONG).show();
+        }
+
+
     }
 
     private void pupulateScreenInfo() {

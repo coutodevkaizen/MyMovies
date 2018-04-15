@@ -20,6 +20,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".DetailsActivity"></activity>
+
+        <provider
+            android:name="com.example.lcout.mymovies.data.FavouriteContentProvider"
+            android:authorities="com.example.lcout.mymovies"
+            android:exported="false"/>
+
     </application>
 
 </manifest>
