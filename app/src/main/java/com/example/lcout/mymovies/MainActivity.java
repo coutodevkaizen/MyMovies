@@ -179,6 +179,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
                         tempMovies.add(temp);
 
                         Log.d(TAG + " - LUAN", "movie: " + temp.toString());
+                        Log.d(TAG + " - LUAN", "movie: " + movie.toString());
 
                     }
 
