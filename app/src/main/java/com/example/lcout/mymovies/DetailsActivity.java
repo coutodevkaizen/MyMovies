@@ -2,7 +2,10 @@ package com.example.lcout.mymovies;
 
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -40,8 +43,15 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
     private final String imgBaseURL = "http://image.tmdb.org/t/p/";
     private final String imgSize = "w185/";
     private ArrayList<Video> mVideos;
+    private ArrayList<Review> mReviews;
     private RecyclerView rvVideos;
+    private RecyclerView rvReviews;
     private VideoAdapter videoAdapter;
+
+    final String baseURL = "http://api.themoviedb.org/3";
+    String trailers = "/movie/%s/videos";
+    String reviews = "/movie/%s/reviews";
+    final String parameterKey = "api_key";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +60,6 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
 
         getMovieFromExtra();
         pupulateScreenInfo();
-        getTrailers();
-        getReviews();
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -60,12 +68,15 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
                 addFavouriteMovie();
             }
         });
+
+        if(!isOnline()){
+            Toast.makeText(this, R.string.no_internet_connection, Toast.LENGTH_LONG).show();
+            return;
+        }
+        getTrailers();
+        getReviews();
     }
 
-    final String baseURL = "http://api.themoviedb.org/3";
-    String trailers = "/movie/%s/videos";
-    String reviews = "/movie/%s/reviews";
-    final String parameterKey = "api_key";
 
     private void getReviews() {
         final String movieApiKey = getResources().getString(R.string.movie_key);
@@ -81,6 +92,8 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d(TAG + " Volley reviews", new Gson().toJson(response));
+                        mReviews = getReviewsFromJson(response);
+                        prepareReviewsRecyclerView();
                     }
                 }, new Response.ErrorListener() {
 
@@ -128,9 +141,16 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         rvVideos.setHasFixedSize(true);
         videoAdapter = new VideoAdapter(mVideos, this, this);
         rvVideos.setAdapter(videoAdapter);
-
     }
 
+    private void prepareReviewsRecyclerView() {
+        rvReviews = findViewById(R.id.rv_reviews);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        rvReviews.setLayoutManager(layoutManager);
+        rvReviews.setHasFixedSize(true);
+//        videoAdapter = new VideoAdapter(mVideos, this, this);
+//        rvVideos.setAdapter(videoAdapter);
+    }
     private ArrayList<Video> getVideosFromJson(JSONObject response) {
         if (response == null || response.equals(""))
             return null;
@@ -158,9 +178,36 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         return tempVideos;
+    }
+    private ArrayList<Review> getReviewsFromJson(JSONObject response) {
+        if (response == null || response.equals(""))
+            return null;
 
+        ArrayList<Review> tempReviews = new ArrayList<>();
+
+        try {
+            JSONArray reviewsJSON = response.getJSONArray("results");
+
+            for (int i = 0; i < reviewsJSON.length(); i++) {
+                JSONObject review = reviewsJSON.getJSONObject(i);
+
+                String author = review.getString("author");
+                String content = review.getString("content");
+                Review temp = new Review();
+                temp.author = author;
+                temp.review = content;
+
+                tempReviews.add(temp);
+
+                Log.d(TAG , "author: " + author);
+                Log.d(TAG, "content: " + content);
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return tempReviews;
     }
 
     private void addFavouriteMovie() {
@@ -217,5 +264,13 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         } catch (ActivityNotFoundException ex) {
             startActivity(webIntent);
         }
+    }
+
+    //TODO: best to move it to an util class
+    private boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 }

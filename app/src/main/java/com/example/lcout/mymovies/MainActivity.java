@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
         }
     }
 
-    //TODO: best to move it for a util class
+    //TODO: best to move it to an util class
     private boolean isOnline() {
         ConnectivityManager cm =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
