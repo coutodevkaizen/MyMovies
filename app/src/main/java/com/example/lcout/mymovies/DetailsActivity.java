@@ -1,5 +1,6 @@
 package com.example.lcout.mymovies;
 
+import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
@@ -7,6 +8,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
@@ -78,14 +80,12 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
 
                     @Override
                     public void onResponse(JSONObject response) {
-                        //mTextView.setText("Response: " + response.toString());
                         Log.d(TAG + " Volley reviews", new Gson().toJson(response));
                     }
                 }, new Response.ErrorListener() {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        // TODO: Handle error
                         Log.d(TAG + " Error Volley reviews", error.toString());
                     }
                 });
@@ -123,7 +123,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
 
     private void prepareVideosRecyclerView() {
         rvVideos = findViewById(R.id.rv_videos);
-        GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         rvVideos.setLayoutManager(layoutManager);
         rvVideos.setHasFixedSize(true);
         videoAdapter = new VideoAdapter(mVideos, this, this);
@@ -168,17 +168,13 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
             return;
 
         ContentValues contentValues = new ContentValues();
-
         contentValues.put(FavouriteContract.FavouriteEntry.COLUMN_MOVIE_ID, mMovie.id);
         contentValues.put(FavouriteContract.FavouriteEntry.COLUMN_TITLE, mMovie.title);
-
         Uri uri = getContentResolver().insert(FavouriteContract.FavouriteEntry.CONTENT_URI, contentValues);
 
         if (uri != null) {
             Toast.makeText(getBaseContext(), uri.toString(), Toast.LENGTH_LONG).show();
         }
-
-
     }
 
     private void pupulateScreenInfo() {
@@ -213,6 +209,13 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
 
     @Override
     public void onListItemClick(int clickedIndex) {
-        //TODO start new intent to open video
+        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + mVideos.get(clickedIndex).key));
+        Intent webIntent = new Intent(Intent.ACTION_VIEW,
+                Uri.parse("http://www.youtube.com/watch?v=" + mVideos.get(clickedIndex).key));
+        try {
+            startActivity(appIntent);
+        } catch (ActivityNotFoundException ex) {
+            startActivity(webIntent);
+        }
     }
 }

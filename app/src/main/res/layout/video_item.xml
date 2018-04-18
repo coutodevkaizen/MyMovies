@@ -11,8 +11,8 @@
         android:id="@+id/ib_play"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginLeft="20dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -20,10 +20,13 @@
 
     <TextView
         android:id="@+id/tv_name"
-        android:layout_width="298dp"
-        android:layout_height="20dp"
+        android:layout_width="246dp"
+        android:layout_height="19dp"
+        android:layout_marginBottom="8dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:text="TextView"
-        app:layout_constraintStart_toEndOf="@+id/imageButton"
-        tools:layout_editor_absoluteY="24dp" />
+        app:layout_constraintBottom_toBottomOf="@+id/ib_play"
+        app:layout_constraintStart_toEndOf="@+id/ib_play"
+        app:layout_constraintTop_toTopOf="@+id/ib_play" />
 </android.support.constraint.ConstraintLayout>

@@ -59,6 +59,7 @@ public class VideoAdapter extends RecyclerView.Adapter<com.example.lcout.mymovie
         public VideoViewHolder(View itemView) {
             super(itemView);
             ibPlay = itemView.findViewById(R.id.ib_play);
+            ibPlay.setOnClickListener(this);
             tvName = itemView.findViewById(R.id.tv_name);
         }
 
