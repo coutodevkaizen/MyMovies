@@ -12,7 +12,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-public class MovieAdapter  extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder>{
+public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
     private static final String TAG = MovieAdapter.class.getSimpleName();
 
@@ -23,12 +23,12 @@ public class MovieAdapter  extends RecyclerView.Adapter<MovieAdapter.MovieViewHo
     final String baseURL = "http://image.tmdb.org/t/p/";
     final String imgSize = "w185/";
 
-    interface ListItemClickListener{
+    interface ListItemClickListener {
         void onListItemClick(int clickedIndex);
 
     }
 
-    public MovieAdapter(ArrayList<Movie> listMovies, ListItemClickListener clickListener, Context context){
+    public MovieAdapter(ArrayList<Movie> listMovies, ListItemClickListener clickListener, Context context) {
         mContext = context;
         mNumberItems = listMovies.size();
         mListMovies = listMovies;

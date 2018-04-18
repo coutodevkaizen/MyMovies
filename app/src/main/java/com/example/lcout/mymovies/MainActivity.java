@@ -81,11 +81,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemThatWasClickedId = item.getItemId();
+        if(!isOnline()){
+            Toast.makeText(this, R.string.no_internet_connection, Toast.LENGTH_LONG).show();
+            return true;
+        }
         if (itemThatWasClickedId == R.id.order_popular) {
-            if(!isOnline()){
-                Toast.makeText(this, R.string.no_internet_connection, Toast.LENGTH_LONG).show();
-                return true;
-            }
             if(lastOrderOption == GetMovies.POPULAR)
                 return true;
             lastOrderOption = GetMovies.POPULAR;
@@ -93,10 +93,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
             new GetMovies(this, GetMovies.POPULAR).execute();
             return true;
         }else if (itemThatWasClickedId == R.id.order_rating) {
-            if(!isOnline()){
-                Toast.makeText(this, R.string.no_internet_connection, Toast.LENGTH_LONG).show();
-                return true;
-            }
             if(lastOrderOption == GetMovies.RATING)
                 return true;
             lastOrderOption = GetMovies.RATING;
@@ -128,15 +124,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
 
     @Override
     public void onListItemClick(int clickedIndex) {
-        /*if(mToast != null)
-            mToast.cancel();*/
-
         Gson gson = new Gson();
         String jsonString = gson.toJson(listMovies.get(clickedIndex));
         Log.d(TAG + " Luan ", jsonString);
-
-        /*mToast = Toast.makeText(this, "Item clicked: #" + listMovies.get(clickedIndex).title, Toast.LENGTH_SHORT);
-        mToast.show();*/
 
         Intent details = new Intent(this, DetailsActivity.class);
         details.putExtra(Intent.EXTRA_TEXT, jsonString);
