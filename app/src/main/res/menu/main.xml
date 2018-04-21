@@ -9,6 +9,11 @@
 
     <item
         android:id="@+id/order_rating"
-        android:orderInCategory="1"
+        android:orderInCategory="2"
         android:title="@string/order_rating"/>
+
+    <item
+        android:id="@+id/order_favourite"
+        android:orderInCategory="3"
+        android:title="@string/order_favourite"/>
 </menu>

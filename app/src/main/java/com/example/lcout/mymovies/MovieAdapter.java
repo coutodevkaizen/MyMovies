@@ -8,74 +8,87 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.example.lcout.mymovies.model.Movie;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
+import java.util.List;
+
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
     private static final String TAG = MovieAdapter.class.getSimpleName();
 
-    private ListItemClickListener mOnClickListener;
-    private int mNumberItems;
-    ArrayList<Movie> mListMovies;
-    Context mContext;
-    final String baseURL = "http://image.tmdb.org/t/p/";
-    final String imgSize = "w185/";
+    private final ItemClickListener mOnClickListener;
+    public List<Movie> mMovies;
+    private final Context mContext;
+    private final String baseURL = "http://image.tmdb.org/t/p/";
+    private final String imgSize = "w185/";
 
-    interface ListItemClickListener {
-        void onListItemClick(int clickedIndex);
+    interface ItemClickListener {
+        void onCursorItemClick(int clickedIndex);
 
     }
 
-    public MovieAdapter(ArrayList<Movie> listMovies, ListItemClickListener clickListener, Context context) {
+    public MovieAdapter(ItemClickListener clickListener, Context context) {
         mContext = context;
-        mNumberItems = listMovies.size();
-        mListMovies = listMovies;
         mOnClickListener = clickListener;
     }
 
     @Override
-    public MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public MovieAdapter.MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         int layoutIdListItem = R.layout.movie_list_item;
         LayoutInflater inflater = LayoutInflater.from(mContext);
         boolean shouldAttachToParentImmediately = false;
-
         View view = inflater.inflate(layoutIdListItem, parent, shouldAttachToParentImmediately);
-        MovieViewHolder viewHolder = new MovieViewHolder(view);
 
-        return viewHolder;
+        return new MovieAdapter.MovieViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(MovieViewHolder holder, int position) {
-        holder.bind(position);
+    public void onBindViewHolder(MovieAdapter.MovieViewHolder holder, int position) {
+        String posterPath = mMovies.get(position).poster_path;
+
+        String fullImageURL = baseURL + imgSize + posterPath;
+        Picasso.with(mContext).load(fullImageURL).into(holder.image);
+        Log.d(TAG, fullImageURL);
     }
 
     @Override
     public int getItemCount() {
-        return mListMovies.size();
+        if (mMovies == null) {
+            return 0;
+        }
+        return mMovies.size();
+    }
+
+    public List<Movie> swapCursor(List<Movie> newMovies) {
+        if (mMovies == newMovies)
+            return null;
+
+        List<Movie> temp = mMovies;
+        this.mMovies = newMovies;
+
+        if (newMovies != null)
+            this.notifyDataSetChanged();
+
+        return temp;
     }
 
     class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        ImageView image;
+        final ImageView image;
 
         public MovieViewHolder(View itemView) {
             super(itemView);
-            image = (ImageView) itemView.findViewById(R.id.iv_image);
+
+            image = itemView.findViewById(R.id.iv_image);
             image.setOnClickListener(this);
         }
 
-        void bind(int position) {
-            String fullImageURL = baseURL + imgSize + mListMovies.get(position).poster_path;
-            Picasso.with(mContext).load(fullImageURL).into(image);
-            Log.d(TAG, mListMovies.get(position).poster_path);
-        }
 
         @Override
         public void onClick(View v) {
-            mOnClickListener.onListItemClick(getAdapterPosition());
+            mOnClickListener.onCursorItemClick(getAdapterPosition());
         }
 
     }

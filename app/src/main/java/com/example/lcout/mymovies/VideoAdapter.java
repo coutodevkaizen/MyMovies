@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.example.lcout.mymovies.model.Video;
+
 import java.util.ArrayList;
 
 /**
@@ -16,9 +18,9 @@ import java.util.ArrayList;
 
 public class VideoAdapter extends RecyclerView.Adapter<com.example.lcout.mymovies.VideoAdapter.VideoViewHolder> {
 
-    private Context mContext;
-    private ArrayList<Video> mListVideos;
-    private VideoAdapter.ListItemClickListener mOnClickListener;
+    private final Context mContext;
+    private final ArrayList<Video> mListVideos;
+    private final VideoAdapter.ListItemClickListener mOnClickListener;
 
     interface ListItemClickListener {
         void onListItemClick(int clickedIndex);
@@ -53,8 +55,8 @@ public class VideoAdapter extends RecyclerView.Adapter<com.example.lcout.mymovie
     }
 
     class VideoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        ImageButton ibPlay;
-        TextView tvName;
+        private final ImageButton ibPlay;
+        private final TextView tvName;
 
         public VideoViewHolder(View itemView) {
             super(itemView);

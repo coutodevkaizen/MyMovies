@@ -17,13 +17,17 @@ import android.support.annotation.Nullable;
 
 public class FavouriteContentProvider extends ContentProvider {
 
-    public static final int FAVOURITE_MOVIES = 100;
-    public static final UriMatcher sUriMatcher = buildUrlMatcher();
+    private static final int FAVOURITE_MOVIES = 100;
+    private static final int FAVOURITE_WITH_MOVIE_ID = 101;
 
-    public static UriMatcher buildUrlMatcher() {
+    private static final UriMatcher sUriMatcher = buildUrlMatcher();
+
+    private static UriMatcher buildUrlMatcher() {
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
         uriMatcher.addURI(FavouriteContract.AUTHORITY, FavouriteContract.PATH_FAVOURITE_MOVIES, FAVOURITE_MOVIES);
+        uriMatcher.addURI(FavouriteContract.AUTHORITY, FavouriteContract.PATH_FAVOURITE_MOVIES + "/#", FAVOURITE_WITH_MOVIE_ID);
+
 
         return uriMatcher;
     }
@@ -40,7 +44,26 @@ public class FavouriteContentProvider extends ContentProvider {
     @Nullable
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
-        return null;
+        final SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        int match = sUriMatcher.match(uri);
+        Cursor retCursor;
+        switch (match) {
+            case FAVOURITE_MOVIES:
+                retCursor =  db.query(FavouriteContract.FavouriteEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        retCursor.setNotificationUri(getContext().getContentResolver(), uri);
+        return retCursor;
     }
 
     @Nullable
@@ -77,7 +100,22 @@ public class FavouriteContentProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
-        return 0;
+        final SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        int match = sUriMatcher.match(uri);
+
+        int movieDeleted;
+
+        switch (match) {
+            case FAVOURITE_WITH_MOVIE_ID:
+                String id = uri.getPathSegments().get(1);
+                // Use selections/selectionArgs to filter for this ID
+                movieDeleted = db.delete(FavouriteContract.FavouriteEntry.TABLE_NAME, "movie_id=?", new String[]{id});
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        return movieDeleted;
     }
 
     @Override

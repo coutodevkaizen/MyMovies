@@ -1,4 +1,4 @@
-package com.example.lcout.mymovies;
+package com.example.lcout.mymovies.model;
 
 /**
  * Created by lcout on 19/04/2018.

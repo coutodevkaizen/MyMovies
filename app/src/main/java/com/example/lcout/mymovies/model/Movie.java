@@ -1,10 +1,10 @@
-package com.example.lcout.mymovies;
+package com.example.lcout.mymovies.model;
 
 /**
  * Created by lcout on 27/12/2017.
  */
 
-class Movie {
+public class Movie {
     public Long id;
     public String title;
     public String poster_path;

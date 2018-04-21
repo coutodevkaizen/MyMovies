@@ -7,10 +7,9 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -27,6 +26,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.lcout.mymovies.data.FavouriteContract;
+import com.example.lcout.mymovies.model.Movie;
+import com.example.lcout.mymovies.model.Review;
+import com.example.lcout.mymovies.model.Video;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
@@ -36,22 +38,17 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class DetailsActivity extends AppCompatActivity implements VideoAdapter.ListItemClickListener{
+public class DetailsActivity extends AppCompatActivity implements VideoAdapter.ListItemClickListener {
 
     private final String TAG = DetailsActivity.class.getSimpleName();
     private Movie mMovie;
-    private final String imgBaseURL = "http://image.tmdb.org/t/p/";
-    private final String imgSize = "w185/";
     private ArrayList<Video> mVideos;
     private ArrayList<Review> mReviews;
-    private RecyclerView rvVideos;
-    private RecyclerView rvReviews;
-    private VideoAdapter videoAdapter;
 
-    final String baseURL = "http://api.themoviedb.org/3";
-    String trailers = "/movie/%s/videos";
-    String reviews = "/movie/%s/reviews";
-    final String parameterKey = "api_key";
+    private final String baseURL = "http://api.themoviedb.org/3";
+    private final String trailers = "/movie/%s/videos";
+    private final String reviews = "/movie/%s/reviews";
+    private final String parameterKey = "api_key";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,14 +66,13 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
             }
         });
 
-        if(!isOnline()){
+        if (!isOnline()) {
             Toast.makeText(this, R.string.no_internet_connection, Toast.LENGTH_LONG).show();
             return;
         }
         getTrailers();
         getReviews();
     }
-
 
     private void getReviews() {
         final String movieApiKey = getResources().getString(R.string.movie_key);
@@ -128,29 +124,29 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d(TAG + " Error Volley videos", error.toString());
-                        return;
                     }
                 });
         Volley.newRequestQueue(this).add(jsonObjectRequest);
     }
 
     private void prepareVideosRecyclerView() {
-        rvVideos = findViewById(R.id.rv_videos);
+        RecyclerView rvVideos = findViewById(R.id.rv_videos);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         rvVideos.setLayoutManager(layoutManager);
         rvVideos.setHasFixedSize(true);
-        videoAdapter = new VideoAdapter(mVideos, this, this);
+        VideoAdapter videoAdapter = new VideoAdapter(mVideos, this, this);
         rvVideos.setAdapter(videoAdapter);
     }
 
     private void prepareReviewsRecyclerView() {
-        rvReviews = findViewById(R.id.rv_reviews);
+        RecyclerView rvReviews = findViewById(R.id.rv_reviews);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         rvReviews.setLayoutManager(layoutManager);
         rvReviews.setHasFixedSize(true);
-//        videoAdapter = new VideoAdapter(mVideos, this, this);
-//        rvVideos.setAdapter(videoAdapter);
+        ReviewAdapter reviewAdapter = new ReviewAdapter(mReviews, this);
+        rvReviews.setAdapter(reviewAdapter);
     }
+
     private ArrayList<Video> getVideosFromJson(JSONObject response) {
         if (response == null || response.equals(""))
             return null;
@@ -171,7 +167,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
 
                 tempVideos.add(temp);
 
-                Log.d(TAG , "name: " + name);
+                Log.d(TAG, "name: " + name);
                 Log.d(TAG, "key: " + key);
             }
 
@@ -180,6 +176,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         }
         return tempVideos;
     }
+
     private ArrayList<Review> getReviewsFromJson(JSONObject response) {
         if (response == null || response.equals(""))
             return null;
@@ -200,7 +197,7 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
 
                 tempReviews.add(temp);
 
-                Log.d(TAG , "author: " + author);
+                Log.d(TAG, "author: " + author);
                 Log.d(TAG, "content: " + content);
             }
 
@@ -214,14 +211,42 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         if (mMovie == null || mMovie.id < 1)
             return;
 
+        ContentValues contentValues = getValuesFromMovie();
+
+        try { //Try to INSERT
+            Uri uri = getContentResolver().insert(FavouriteContract.FavouriteEntry.CONTENT_URI, contentValues);
+            if (uri != null) {
+                Log.d(TAG, contentValues.toString());
+                Toast.makeText(getBaseContext(), "Added to Favorite! :)", Toast.LENGTH_SHORT).show();
+            }
+        } catch (android.database.SQLException ex) {
+
+            //Already in the DB, so try to DELETE
+            String movieID = mMovie.id.toString();
+            Uri uri = FavouriteContract.FavouriteEntry.CONTENT_URI;
+            uri = uri.buildUpon().appendPath(movieID).build();
+
+            try {
+                int moviesDeleted = getContentResolver().delete(uri, null, null);
+                if (moviesDeleted > 0)
+                    Toast.makeText(getBaseContext(), "Removed from Favorite! :(", Toast.LENGTH_SHORT).show();
+
+            } catch (Exception exDel) {
+                    Toast.makeText(getBaseContext(), "ALERT: ERROR", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, exDel.getMessage());
+            }
+        }
+    }
+
+    private ContentValues getValuesFromMovie() {
         ContentValues contentValues = new ContentValues();
         contentValues.put(FavouriteContract.FavouriteEntry.COLUMN_MOVIE_ID, mMovie.id);
         contentValues.put(FavouriteContract.FavouriteEntry.COLUMN_TITLE, mMovie.title);
-        Uri uri = getContentResolver().insert(FavouriteContract.FavouriteEntry.CONTENT_URI, contentValues);
-
-        if (uri != null) {
-            Toast.makeText(getBaseContext(), uri.toString(), Toast.LENGTH_LONG).show();
-        }
+        contentValues.put(FavouriteContract.FavouriteEntry.COLUMN_OVERVIEW, mMovie.overview);
+        contentValues.put(FavouriteContract.FavouriteEntry.COLUMN_POSTER_PATH, mMovie.poster_path);
+        contentValues.put(FavouriteContract.FavouriteEntry.COLUMN_RELEASE_DATE, mMovie.release_date);
+        contentValues.put(FavouriteContract.FavouriteEntry.COLUMN_VOTE_AVERAGE, mMovie.vote_average);
+        return contentValues;
     }
 
     private void pupulateScreenInfo() {
@@ -232,6 +257,8 @@ public class DetailsActivity extends AppCompatActivity implements VideoAdapter.L
         TextView release_date = findViewById(R.id.tv_release);
 
         title.setText(mMovie.title);
+        String imgBaseURL = "http://image.tmdb.org/t/p/";
+        String imgSize = "w185/";
         String fullImageURL = imgBaseURL + imgSize + mMovie.poster_path;
         Picasso.with(this).load(fullImageURL).into(thumbnail);
         overview.setText(mMovie.overview);

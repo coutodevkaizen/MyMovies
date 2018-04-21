@@ -1,10 +1,10 @@
-package com.example.lcout.mymovies;
+package com.example.lcout.mymovies.model;
 
 /**
  * Created by lcout on 18/04/2018.
  */
 
-class Video {
+public class Video {
     public String name;
     public String key;
 }
