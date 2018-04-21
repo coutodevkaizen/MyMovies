@@ -1,8 +1,8 @@
-# MyMovies
+# MyMovies - Part 1 & 2
 
 [Android Developer Nanodegree]: https://www.udacity.com/course/android-developer-nanodegree-by-google--nd801
 [The Movie Database]: https://www.themoviedb.org
-
+[Project Specifications]: https://review.udacity.com/#!/rubrics/67/view
 
 Simple project done as part of **[Android Developer Nanodegree]** by Udacity.
 
@@ -16,3 +16,4 @@ Please make sure you create keys.xml inside the \res\values\ folder, and also pu
 <string name="movie_key">YOUR_KEY_HERE</string>
 ```
     
+**[Project Specifications]** 

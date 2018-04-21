@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:adjustViewBounds="true"
-        android:contentDescription="Movie poster"
+        android:contentDescription="@string/movie_poster"
         />
 
 </FrameLayout>
