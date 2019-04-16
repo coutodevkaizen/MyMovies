@@ -14,6 +14,7 @@ Expand on the movies app built in Project 1 to create a fully-featured app. This
 
 
 App's main screen:
+
 <img align="center" width="200" height="380"
      title="Size Limit logo" src="./Screenshot_home.PNG">
      
